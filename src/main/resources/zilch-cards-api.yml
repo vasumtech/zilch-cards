@@ -1,0 +1,194 @@
+openapi: '3.0.3'
+info:
+  title: zilch-cards
+  description: zilch-cards API
+  version: '1.0.0'
+servers:
+  - url: "/"
+tags:
+  - name: Cards
+    description: API for Cards
+  - name: UserAuthentication
+    description: API for Zilch Users Authentication
+  - name: UserSignup
+    description: API for Zilch Users Signup
+paths:
+  # IMPORTANT: All Authentication/Signup layer endpoints should be part of Microservice-1 deployment (i.e., /login, /signup and other authentication activities)
+  /v1/login:
+    post:
+      tags:
+        - UserAuthentication
+      operationId: login
+      requestBody:
+        description: Signin with username and password
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSigninRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSigninResponse'
+        401:
+          description: Unauthorized
+        400:
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalError'
+
+  # IMPORTANT: The below endpoints should be part of Microservice-2 deployment (i.e., /cards and other card related activities)
+  /v1/cards:
+    post:
+      summary: Add new card details
+      tags:
+        - Cards
+      operationId: addCard
+      requestBody:
+        description: Card to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCardRequest'
+        required: true
+      responses:
+        201:
+          description: Card Added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddCardResponse'
+        400:
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        403:
+          description: Forbidden
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalError'
+
+components:
+  schemas:
+    AddCardRequest:
+      description: Request to add a new Card
+      type: object
+      properties:
+        companyId:
+          type: integer
+          example: 1
+        cardNumber:
+          type: string
+          pattern: \d{4}\s\d{4}\s\d{4}\s\d{4}
+          example: "5523 3462 2294 4831"
+        title:
+          type: string
+          minLength: 2
+          maxLength: 5
+          example: "Mr"
+        nameOnCard:
+          type: string
+          minLength: 4
+          maxLength: 50
+          example: "K JOHN"
+        validFrom:
+          type: string
+          pattern: (0[1-9]|1[0-2])\/\d{4}
+          example: "04/2022"
+        validUntil:
+          type: string
+          pattern: (0[1-9]|1[0-2])\/\d{4}
+          example: "03/2025"
+        pin:
+          type: string
+          pattern: '\d{3}'
+          example: 931
+      required:
+        - companyId
+        - cardNumber
+        - validFrom
+        - validUntil
+        - title
+        - nameOnCard
+        - pin
+    AddCardResponse:
+      type: object
+      properties:
+        title:
+          type: string
+        nameOnCard:
+          type: string
+      required:
+        - title
+        - nameOnCard
+    UserSigninRequest:
+      type: object
+      properties:
+        userName:
+          type: string
+          minLength: 8
+          maxLength: 50
+          example: "kevinj99"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 50
+          example: "P$ssT*$84$$VU"
+      required:
+        - userName
+        - password
+    UserSigninResponse:
+      type: object
+      properties:
+        authToken:
+          type: string
+      required:
+        - authToken
+    ApiError:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/InputValidationError'
+    InputValidationError:
+      type: object
+      properties:
+        fieldName:
+          type: string
+          description: Validation field containing error
+        message:
+          type: string
+          description: Validation Error Message details
+    InternalError:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: Error code to investigate
+          example: "ERR-501"
+        errorDesc:
+          type: string
+          description: Error message details
+          example: "Internal error, Unable to update card details"
+      required:
+        - errorCode
+        - errorDesc

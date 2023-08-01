@@ -1,0 +1,36 @@
+spring:
+  test:
+    database:
+      replace: none
+  datasource:
+    url: jdbc:h2:mem:zilch_cards_db
+    driverClassName: org.h2.Driver
+    username: zilch_cards_user
+    password: Zilch$$**2023
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        show_sql: true
+        type: trace
+  h2:
+    console:
+      enabled: true
+  sql:
+    init:
+      schema-locations: classpath:zilch-users-schema.sql, classpath:zilch-cards-schema.sql
+      data-locations: classpath:zilch-users-data.sql, classpath:zilch-cards-data.sql
+
+logging:
+  level:
+    org:
+      springframework: INFO
+      hibernate: INFO
+
+zilch:
+  security:
+    jwt:
+      secret: vbL4Xt95jlpONhdSK1wGiguHRpqWeJjzaewmnaC74lrXEwiT
+      token-validity-milliseconds: 600000

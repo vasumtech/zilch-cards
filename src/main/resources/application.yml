@@ -1,0 +1,26 @@
+
+
+# IMPORTANT: ALL SECRETS/PASSWORDS SHOULD BE STORED IN A VAULT
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/zilch_cards_db
+    driverClassName: org.postgresql.Driver
+    username: zilch_cards_user
+    password: Zilch$$**2023
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+
+# IMPORTANT: ALL SECRETS/PASSWORDS SHOULD BE STORED IN A VAULT
+zilch:
+  security:
+    jwt:
+      secret: RXJIY2d4RjlpSnl2Ym5xTGdnY2FTQzFzampkUWFTREhjWF9qSGRncE5IdmxjUlk2
+      token-validity-milliseconds: 600000
+
+server:
+  error:
+    include-message: always
