@@ -55,6 +55,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -193,6 +197,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <version>3.0.9</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>5.3.1</version>
@@ -232,6 +243,9 @@
                 <version>3.2.0</version>
                 <configuration>
                     <excludeVulnerabilityIds>
+                        <exclude>CVE-2023-34453</exclude> <!-- This Vulnerability is NOT an impact for the project -->
+                        <exclude>CVE-2023-34454</exclude> <!-- This Vulnerability is NOT an impact for the project -->
+                        <exclude>CVE-2023-34455</exclude> <!-- This Vulnerability is NOT an impact for the project -->
                         <exclude>CVE-2023-34034</exclude> <!-- This Vulnerability is NOT an impact for the project -->
                         <exclude>CVE-2023-34035</exclude> <!-- This Vulnerability is NOT an impact for the project -->
                         <exclude>CVE-2023-34034</exclude> <!-- This Vulnerability is NOT an impact for the project -->

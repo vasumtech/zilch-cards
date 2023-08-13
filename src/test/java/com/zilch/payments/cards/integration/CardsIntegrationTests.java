@@ -1,21 +1,10 @@
 package com.zilch.payments.cards.integration;
 
-import static com.zilch.payments.cards.CardTestFixture.*;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CONFLICT;
-
 import com.zilch.payments.cards.repositories.CardRepository;
 import com.zilch.payments.models.AddCardRequest;
 import com.zilch.payments.models.AddCardResponse;
 import com.zilch.payments.security.auth.repositories.ZilchUserRepository;
 import io.restassured.RestAssured;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,10 +15,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.stream.Stream;
+
+import static com.zilch.payments.cards.CardTestFixture.*;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext
 @ActiveProfiles("test")
+@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9999", "port=9999" }, topics = { "com.zilch.payments.cards.newcard" })
 class CardsIntegrationTests {
 
   @Autowired private CardRepository cardRepository;
@@ -320,6 +326,9 @@ class CardsIntegrationTests {
         .response();
   }
 
+  @Autowired
+  private EmbeddedKafkaBroker embeddedKafkaBroker;
+
   @DisplayName("Save card details for a valid token and input request")
   @Test
   void givenValidAddCardRequest_whenSaveCard_thenReturnAddCardResponse() {
@@ -337,7 +346,6 @@ class CardsIntegrationTests {
             .body()
             .as(AddCardResponse.class);
     AddCardResponse expectedResponse = createTestAddCardResponse();
-
     assertThat(actualResponse, is(equalTo(expectedResponse)));
   }
 

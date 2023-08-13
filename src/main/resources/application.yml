@@ -1,7 +1,10 @@
 
 
+
 # IMPORTANT: ALL SECRETS/PASSWORDS SHOULD BE STORED IN A VAULT
 spring:
+  kafka:
+    bootstrap-servers: localhost:9092
   datasource:
     url: jdbc:postgresql://localhost:5432/zilch_cards_db
     driverClassName: org.postgresql.Driver

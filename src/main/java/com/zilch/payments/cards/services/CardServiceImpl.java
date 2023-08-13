@@ -1,5 +1,7 @@
 package com.zilch.payments.cards.services;
 
+import com.zilch.payments.cards.events.dto.NewCardEvent;
+import com.zilch.payments.cards.events.producers.NewCardEventPublisher;
 import com.zilch.payments.cards.exceptions.AccessDeniedException;
 import com.zilch.payments.cards.exceptions.CardAlreadyAddedException;
 import com.zilch.payments.cards.mappers.CardMapper;
@@ -9,12 +11,13 @@ import com.zilch.payments.models.AddCardRequest;
 import com.zilch.payments.models.AddCardResponse;
 import com.zilch.payments.security.auth.dto.ZilchAuthenticatedPrincipal;
 import jakarta.transaction.Transactional;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,8 @@ public class CardServiceImpl implements CardService {
 
   private final CardMapper cardMapper;
 
+  private final NewCardEventPublisher newCardEventPublisher;
+
   @Override
   @Transactional
   public AddCardResponse saveCard(
@@ -45,6 +50,7 @@ public class CardServiceImpl implements CardService {
         });
     Card cardSaved = cardRepository.save(card);
     log.debug(" : Exit : {}", zilchAuthenticatedPrincipal.getUserName());
+    publishNewCardEvent(addCardRequest, zilchAuthenticatedPrincipal.getUserId());
     return new AddCardResponse(cardSaved.getTitle(), cardSaved.getNameOnCard());
   }
 
@@ -60,5 +66,11 @@ public class CardServiceImpl implements CardService {
     card.setPin(passwordEncoder.encode(addCardRequest.getPin()));
     card.setUserId(userId);
     return card;
+  }
+
+  private void publishNewCardEvent(AddCardRequest addCardRequest, long userId) {
+    NewCardEvent newCardEvent = new NewCardEvent(userId, addCardRequest.getCompanyId(),
+            addCardRequest.getCardNumber());
+    newCardEventPublisher.publishNewCardEvent(newCardEvent);
   }
 }
